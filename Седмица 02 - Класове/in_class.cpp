@@ -56,6 +56,7 @@ public:
 
     void swap(Triangle &other)
     {
+        using std::swap;
         std::swap(a, other.a);
         std::swap(b, other.b);
         std::swap(c, other.c);
