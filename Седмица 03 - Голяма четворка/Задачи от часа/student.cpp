@@ -35,6 +35,7 @@ Student::Student(const Student& other)
                   group(other.group),
                   grade(2)
 {
+    // copy(other);
     year = other.year;
 
     grade = other.grade;
@@ -90,7 +91,7 @@ double Student::getGrade() const {
     return grade;
 }
 
-void Student::setName(char* _name) {
+void Student::setName(const char* _name) {
     strcpy(name, _name);
 }
 

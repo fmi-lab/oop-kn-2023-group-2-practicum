@@ -13,8 +13,7 @@ int main()
     Student anon("Yavor");
     Student student("Stukata", "8MI0800229", 1, 2, 4.25);
     Student copy(student);
-    char name[] = "Georgi1";
-    copy.setName(name);
+    copy.setName("Georgi");
     student.print();
     anon.print();
 

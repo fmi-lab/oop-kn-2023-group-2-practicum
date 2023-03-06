@@ -30,7 +30,7 @@ public:
     const char* getName() const;
     double getGrade() const;
 
-    void setName(char* _name);
+    void setName(const char* _name);
     void setYear(unsigned _year);
     void setGrade(double _grade);
 
