@@ -12,9 +12,9 @@ int main() {
     q.addCoeff(10);
 
     Polynomial y = p + q;
-    // std::cout<<y(6);
+    std::cout<<y(6)<<'\n';
     q -= p;
     std::cout<<'\n'<<q<<'\n';
-    // std::cout<<'\n'<<y*2.5<<'\n';
+    std::cout<<'\n'<<y*2.5<<'\n';
     return 0;
 }

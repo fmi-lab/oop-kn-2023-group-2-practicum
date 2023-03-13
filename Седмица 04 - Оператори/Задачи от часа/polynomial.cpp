@@ -1,16 +1,6 @@
 #include <cmath>
 #include "polynomial.hpp"
 
-template <typename T, typename U>
-U reduce(T *arr, std::size_t size, U (*acc)(const U &, const T &), const U &nv)
-{
-    for (size_t i = 0; i < size; i++)
-    {
-        nv = acc(nv, arr[i]);
-    }
-    return nv;
-}
-
 bool areEqual(double a, double b)
 {
     constexpr double EPSILON = 0.000001;
@@ -96,18 +86,10 @@ void Polynomial::removeCoeff()
 
 double Polynomial::operator()(double x) const
 {
-    // int n = 0;
-    // return reduce<double, double>(coefficients, degree + 1,
-    //               [&](const double& res, const double& el) -> double {
-    //     return res + el * pow(x, n++);
-    // }, 0);
-
-    double res = 0;
-    for (size_t i = 0; i < degree + 1; i++)
-    {
-        res = res + coefficients[i] * pow(x, i);
-    }
-    return res;
+    int n = 0;
+    return reduce(coefficients, degree + 1, [x, &n](const double& res, const double& el) {
+        return res + el * pow(x, n++);
+    }, 0);
 }
 
 double Polynomial::operator[](std::size_t index) const

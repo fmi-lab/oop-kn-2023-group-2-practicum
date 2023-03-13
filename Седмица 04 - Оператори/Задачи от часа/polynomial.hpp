@@ -41,4 +41,14 @@ public:
     friend std::ostream& operator<<(std::ostream&, const Polynomial&);
 };
 
+template <typename T, typename U, typename BinaryOperation>
+U reduce(T *const arr, std::size_t size, BinaryOperation acc, U nv)
+{
+    for (size_t i = 0; i < size; i++)
+    {
+        nv = acc(nv, arr[i]);
+    }
+    return nv;
+}
+
 #endif
