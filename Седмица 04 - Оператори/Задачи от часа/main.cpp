@@ -7,6 +7,10 @@ int main() {
     p.addCoeff(5);
     p.addCoeff(2);
 
+    Polynomial p1;
+    p1.addCoeff(10);
+    p1.addCoeff(4);
+
     q.addCoeff(3);
     q.addCoeff(9);
     q.addCoeff(10);
@@ -16,5 +20,6 @@ int main() {
     q -= p;
     std::cout<<'\n'<<q<<'\n';
     std::cout<<'\n'<<y*2.5<<'\n';
+    std::cout<<'\n'<<std::boolalpha<<(p == p1)<<' ' << (q == y)<<'\n';
     return 0;
 }

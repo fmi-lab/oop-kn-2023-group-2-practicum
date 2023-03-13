@@ -187,9 +187,9 @@ bool Polynomial::operator==(const Polynomial &other) const
 
     double diff = coefficients[0] / other.coefficients[0];
     Polynomial p = other * diff;
-    for (size_t i = 0; i < degree; i++)
+    for (size_t i = 0; i < degree + 1; i++)
     {
-        if (!areEqual(coefficients[i], other.coefficients[i]))
+        if (!areEqual(coefficients[i], p.coefficients[i]))
         {
             return false;
         }
