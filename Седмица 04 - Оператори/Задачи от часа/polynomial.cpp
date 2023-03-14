@@ -1,4 +1,5 @@
 #include <cmath>
+#include <algorithm>
 #include "polynomial.hpp"
 
 bool areEqual(double a, double b)
