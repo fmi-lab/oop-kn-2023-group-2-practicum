@@ -51,4 +51,16 @@ U reduce(T *const arr, std::size_t size, BinaryOperation acc, U nv)
     return nv;
 }
 
+template <typename T, typename U = double, typename UnaryOperation>
+U* map(T* arr, std::size_t size, UnaryOperation op)
+{
+    U* result = new U[size];
+    for (size_t i = 0; i < size; i++)
+    {
+        result[i] = op(arr[i]);
+    }
+    
+    return result;
+}
+
 #endif
