@@ -13,12 +13,15 @@ void Polynomial::resize()
     {
         ++capacity;
     }
+    
     std::size_t newCapacity = capacity * 2;
     double *newCoefficients = new double[newCapacity];
+
     for (std::size_t i = 0; i < degree + 1; i++)
     {
         newCoefficients[i] = coefficients[i];
     }
+
     delete[] coefficients;
     coefficients = newCoefficients;
     capacity = newCapacity;
@@ -28,7 +31,9 @@ void Polynomial::copy(const Polynomial &other)
 {
     degree = other.degree;
     capacity = other.capacity;
+
     coefficients = new double[other.capacity];
+
     for (std::size_t i = 0; i < other.degree + 1; i++)
     {
         coefficients[i] = other.coefficients[i];
@@ -87,9 +92,9 @@ void Polynomial::removeCoeff()
 double Polynomial::operator()(double x) const
 {
     int n = 0;
-    return reduce(coefficients, degree + 1, [x, &n](const double& res, const double& el) {
-        return res + el * pow(x, n++);
-    }, 0);
+    return reduce(coefficients, degree + 1, [x, &n](const double &res, const double &el){
+            return res + el * pow(x, n++); 
+        },0);
 }
 
 double Polynomial::operator[](std::size_t index) const
@@ -104,8 +109,10 @@ double Polynomial::operator[](std::size_t index) const
 Polynomial Polynomial::operator+(const Polynomial &other) const
 {
     Polynomial res;
+    
     std::size_t minDegree = std::min(degree, other.degree);
     std::size_t maxDegree = std::max(degree, other.degree);
+
     for (size_t i = 0; i < minDegree + 1; i++)
     {
         res.addCoeff(coefficients[i] + other.coefficients[i]);
@@ -137,6 +144,7 @@ Polynomial &Polynomial::operator-=(const Polynomial &other)
 {
     std::size_t minDegree = std::min(degree, other.degree);
     std::size_t maxDegree = std::max(degree, other.degree);
+    
     for (size_t i = 0; i < minDegree + 1; i++)
     {
         coefficients[i] -= other.coefficients[i];
@@ -148,7 +156,8 @@ Polynomial &Polynomial::operator-=(const Polynomial &other)
         {
             addCoeff(other.coefficients[i]);
         }
-        else {
+        else
+        {
             coefficients[i] = -coefficients[i];
         }
     }
