@@ -21,5 +21,7 @@ int main() {
     std::cout<<'\n'<<q<<'\n';
     std::cout<<'\n'<<y*2.5<<'\n';
     std::cout<<'\n'<<std::boolalpha<<(p == p1)<<' ' << (q == y)<<'\n';
+    y *= 5;
+    std::cout<<'\n'<<y<<'\n';
     return 0;
 }

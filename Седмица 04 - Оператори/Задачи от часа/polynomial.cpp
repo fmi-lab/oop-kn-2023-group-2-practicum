@@ -1,4 +1,5 @@
 #include <cmath>
+#include <algorithm>
 #include "polynomial.hpp"
 
 bool areEqual(double a, double b)
@@ -92,9 +93,10 @@ void Polynomial::removeCoeff()
 double Polynomial::operator()(double x) const
 {
     int n = 0;
-    return reduce(coefficients, degree + 1, [x, &n](const double &res, const double &el){
-            return res + el * pow(x, n++); 
-        },0);
+    return reduce(
+        coefficients, degree + 1, [x, &n](const double &res, const double &el)
+        { return res + el * pow(x, n++); },
+        0);
 }
 
 double Polynomial::operator[](std::size_t index) const
@@ -132,12 +134,14 @@ Polynomial Polynomial::operator+(const Polynomial &other) const
     return res;
 }
 
-Polynomial Polynomial::operator-(const Polynomial &) const
+Polynomial Polynomial::operator-(const Polynomial &other) const
 {
+    return *this + other*(-1);
 }
 
-Polynomial &Polynomial::operator+=(const Polynomial &)
+Polynomial &Polynomial::operator+=(const Polynomial &other)
 {
+    return *this -= other*(-1);
 }
 
 Polynomial &Polynomial::operator-=(const Polynomial &other)
@@ -175,16 +179,36 @@ Polynomial Polynomial::operator*(double n) const
     return res;
 }
 
-Polynomial Polynomial::operator/(double) const
+Polynomial Polynomial::operator/(double n) const
 {
+    Polynomial res;
+    for (size_t i = 0; i < degree + 1; i++)
+    {
+        res.addCoeff(coefficients[i] / n);
+    }
+    return res;
 }
 
-Polynomial &Polynomial::operator*=(double)
+Polynomial &Polynomial::operator*=(double n)
 {
+    double *newCoefficients = map(coefficients, degree + 1, [n](double a) -> double
+                                  { return a * n; });
+
+    delete[] coefficients;
+    coefficients = newCoefficients;
+
+    return *this;
 }
 
-Polynomial &Polynomial::operator/=(double)
+Polynomial &Polynomial::operator/=(double n)
 {
+    double *newCoefficients = map(coefficients, degree + 1, [n](double a) -> double
+                                  { return a / n; });
+
+    delete[] coefficients;
+    coefficients = newCoefficients;
+
+    return *this;
 }
 
 bool Polynomial::operator==(const Polynomial &other) const
