@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <cstring>
 #include <iostream>
+#include <functional>
 
 template <typename T>
 class Bag
@@ -18,6 +19,8 @@ private:
     void destroy();
 
 public:
+    using Predicate = std::function<bool(const T &)>;
+
     Bag(const char *_producer, std::size_t _capacity = 0);
     Bag(const Bag &other);
     ~Bag();
@@ -28,10 +31,12 @@ public:
     Bag operator+(const Bag &other) const;
 
     template <typename V>
-    friend std::ostream& operator<<(std::ostream& os, const Bag<V>& other);
+    friend std::ostream &operator<<(std::ostream &os, const Bag<V> &other);
 
     template <typename V>
     bool operator==(const Bag<V> &other) const;
+
+    void filter(Predicate p);
 };
 
 template <typename T>
@@ -128,7 +133,7 @@ Bag<T> Bag<T>::operator+(const Bag &other) const
     Bag<T> result = *this; // <=> Bag<T> result(*this);
     Bag<T> copy(other);
 
-    while(copy.size)
+    while (copy.size)
     {
         result.add(copy.get());
     }
@@ -140,27 +145,47 @@ template <typename T>
 template <typename V>
 bool Bag<T>::operator==(const Bag<V> &other) const
 {
-    if(size != other.size){
+    if (size != other.size)
+    {
         return false;
     }
 
     for (size_t i = 0; i < size; i++)
     {
-        if(arr[i] != other.arr[i]) {
+        if (arr[i] != other.arr[i])
+        {
             return false;
         }
     }
-    
+
     return true;
 }
 
 template <typename T>
-std::ostream& operator<<(std::ostream& os, const Bag<T>& other) {
+std::ostream &operator<<(std::ostream &os, const Bag<T> &other)
+{
     for (size_t i = 0; i < other.size; i++)
     {
-        os << other.arr[i]<<'\n';
+        os << other.arr[i] << '\n';
     }
     return os;
+}
+
+template <typename T>
+void Bag<T>::filter(Predicate p)
+{
+    T *newArr = new T[capacity];
+    std::size_t newSize = 0;
+    for (size_t i = 0; i < size; i++)
+    {
+        if (p(arr[i]))
+        {
+            newArr[newSize++] = arr[i];
+        }
+    }
+    delete[] arr;
+    arr = newArr;
+    size = newSize;
 }
 
 #endif
