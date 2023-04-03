@@ -32,5 +32,6 @@
 *.app
 
 *.o
+*.txt
 .vscode
 .vscodium
