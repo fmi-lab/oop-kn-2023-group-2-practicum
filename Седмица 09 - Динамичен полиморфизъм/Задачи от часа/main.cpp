@@ -141,14 +141,17 @@ private:
 
 public:
     Game() : size(0), capacity(0), characters(nullptr) {}
+
     Game(const Game &other)
     {
         copy(other);
     }
+    
     ~Game()
     {
         destroy();
     }
+
     Game &operator=(const Game &other)
     {
         if (this != &other)
@@ -173,6 +176,7 @@ public:
     {
         Character *attackingCharacter = find(attacker);
         Character *defendingCharacter = find(target);
+
         if (!attackingCharacter)
         {
             std::cout << "No character with name " << attacker << '\n';
@@ -186,8 +190,6 @@ public:
         }
 
         attackingCharacter->dealDamageTo(*defendingCharacter);
-
-        // TODO: remove character if health bellow 0
     }
 
     void print() const
@@ -202,9 +204,7 @@ public:
 int main()
 {
     Character kratos("Kratos", 200, 50);
-    kratos.print();
     Knight artorias("Artorias", 175, 25);
-    artorias.print();
     Game game;
     game.add(&kratos);
     game.add(&artorias);
