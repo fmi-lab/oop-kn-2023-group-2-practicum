@@ -1,3 +1,4 @@
+#include <cassert>
 #include "game.hpp"
 
 void Game::resize()
@@ -24,11 +25,16 @@ void Game::copy(const Game &other)
     characters = new Character *[other.capacity];
     for (std::size_t i = 0; i < other.size; i++)
     {
-        characters[i] = other.characters[i];
+        characters[i] = other.characters[i]->clone();
     }
 }
 void Game::destroy()
 {
+    for (size_t i = 0; i < size; i++)
+    {
+        delete characters[i];
+    }
+
     delete[] characters;
 }
 
@@ -60,20 +66,44 @@ Game &Game::operator=(const Game &other)
 {
     if (this != &other)
     {
-        copy(other);
         destroy();
+        copy(other);
     }
     return *this;
 }
 
-void Game::add(Character *character)
+void Game::remove(std::size_t index)
+{
+    assert(index < size);
+
+    delete characters[index];
+    for (size_t i = index; i < size - 1; i++)
+    {
+        std::swap(characters[i], characters[i + 1]);
+    }
+    --size;
+}
+
+std::size_t Game::findIndex(const Character *character) const
+{
+    for (size_t i = 0; i < size; i++)
+    {
+        if (characters[i] == character)
+        {
+            return i;
+        }
+    }
+    return size;
+}
+
+void Game::add(const Character *character)
 {
     if (size == capacity)
     {
         resize();
     }
 
-    characters[size++] = character;
+    characters[size++] = character->clone();
 }
 
 void Game::battle(const std::string &attacker, const std::string &target)
@@ -95,13 +125,30 @@ void Game::battle(const std::string &attacker, const std::string &target)
 
     attackingCharacter->dealDamageTo(*defendingCharacter);
 
-    // TODO: remove character if health bellow 0
+    if (!defendingCharacter->isAlive())
+    {
+        remove(findIndex(defendingCharacter));
+    }
 }
 
-void Game::print() const
+void Game::print(std::ostream &os) const
 {
     for (std::size_t i = 0; i < size; i++)
     {
         characters[i]->print();
     }
+}
+
+void Game::heal(double points)
+{
+    for (size_t i = 0; i < size; i++)
+    {
+        characters[i]->heal(points);
+    }
+}
+
+std::ostream &Game::serialize(std::ostream &os) const
+{
+    print(os);
+    return os;
 }

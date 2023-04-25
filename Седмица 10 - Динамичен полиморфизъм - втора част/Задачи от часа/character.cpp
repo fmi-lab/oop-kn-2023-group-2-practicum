@@ -35,3 +35,13 @@ void Character::print() const
     std::cout << "HP: " << hp << '\n'
               << "DMG: " << dmg << '\n';
 }
+
+Character *Character::clone() const
+{
+    return new Character(*this);
+}
+
+bool Character::isAlive() const
+{
+    return hp > 0;
+}

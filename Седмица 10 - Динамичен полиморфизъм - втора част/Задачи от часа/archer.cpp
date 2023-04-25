@@ -13,3 +13,8 @@ void Archer::takeDamage(double points)
     points *= 1.15;
     Character::takeDamage(points);
 }
+
+Character *Archer::clone() const
+{
+    return new Archer(*this);
+}

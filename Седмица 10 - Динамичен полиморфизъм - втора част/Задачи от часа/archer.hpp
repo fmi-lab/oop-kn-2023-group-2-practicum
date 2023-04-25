@@ -10,6 +10,8 @@ private:
 public:
     Archer(const std::string &_name = "<anonymous>", double _hp = 0, double _dmg = 0);
     void takeDamage(double points) final;
+
+    Character* clone() const final;
 };
 
 #endif

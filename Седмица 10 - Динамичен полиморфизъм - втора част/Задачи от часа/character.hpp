@@ -21,6 +21,11 @@ public:
     bool operator==(const std::string &_name) const;
 
     void print() const;
+
+    virtual ~Character() = default;
+
+    virtual Character* clone() const;
+    bool isAlive() const;
 };
 
 #endif
