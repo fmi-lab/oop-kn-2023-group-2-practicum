@@ -33,5 +33,6 @@
 
 *.o
 *.txt
+*.bin
 .vscode
 .vscodium
