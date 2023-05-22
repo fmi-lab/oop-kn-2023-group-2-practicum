@@ -2,6 +2,7 @@
 #include <fstream>
 #include <cstring>
 #include <string>
+#include <vector>
 
 class BinarySerializable
 {
@@ -33,7 +34,7 @@ public:
 
     void serialize(const std::string &filename)
     {
-        std::fstream os(filename, std::ios::out | std::ios::binary);
+        std::fstream os(filename, std::ios::out | std::ios::binary | std::ios::app);
         os.write(reinterpret_cast<const char *>(this), sizeof(Book));
         os.close();
     }
@@ -66,6 +67,76 @@ private:
     unsigned id;
 };
 
+class Library : public BinarySerializable {
+public:
+    Library(const std::string& _name) : name(_name) {}
+
+    void serialize(const std::string &filename) {
+        std::fstream os(filename, std::ios::out | std::ios::binary);
+
+        std::size_t nameLength = name.size();
+        os.write(reinterpret_cast<const char*>(&nameLength), sizeof(std::size_t));
+        os.write(name.c_str(), nameLength);   
+
+        std::size_t booksLength = books.size();
+        os.write(reinterpret_cast<const char*>(&booksLength), sizeof(std::size_t));
+
+        os.close();
+        for (Book& book : books)
+        {
+            book.serialize(filename);
+        }
+    }
+
+    void serializeAt(const std::string &filename, std::size_t pos) {
+
+    }
+
+    void deserialize(const std::string &filename) {
+        std::fstream is(filename, std::ios::in);
+        std::size_t nameSize;
+        is.read(reinterpret_cast<char*>(&nameSize), sizeof(std::size_t));
+        char* binaryName = new char[nameSize+1];
+        is.read(binaryName, nameSize);
+
+        name = std::string();
+        for (size_t i = 0; i < nameSize; i++)
+        {
+            name.push_back(binaryName[i]);
+        }
+        delete[] binaryName;
+        
+        std::size_t booksSize;
+        is.read(reinterpret_cast<char*>(&booksSize), sizeof(std::size_t));
+        is.close();
+        for (size_t i = 0; i < booksSize; i++)
+        {
+            Book book;
+            book.deserialize(filename);
+            books.push_back(book);
+        }
+    }
+
+    void deserializeAt(const std::string &filename, std::size_t pos) {
+
+    }
+
+    void add(const Book& book) {
+        books.push_back(book);
+    }
+
+    std::size_t getListSize() const {
+        return books.size();
+    }
+
+    const std::string& getName() const {
+        return name;
+    }
+private:
+    std::string name;
+    std::vector<Book> books;
+};
+
 void swap(int &a, int &b)
 {
     a = a ^ b; // a ^= b;
@@ -90,11 +161,19 @@ int main()
     // std::cout<<a<<' '<<b<<'\n';
     // std::cout<<std::boolalpha<<even(5)<<' ' <<even(4)<<'\n';
     // std::cout << change_sign(-7) << '\n';
-    Book book("LOTR", "Tolkien", 5);
-    book.serialize("book.bin");
-    Book next;
-    next.deserialize("book.bin");
-    next.print();
-    next.serializeAt("book.bin", 0);
+    // Book book("LOTR", "Tolkien", 5);
+    // book.serialize("book.bin");
+    // Book next;
+    // next.deserialize("book.bin");
+    // next.print();
+    // next.serializeAt("book.bin", 1);
+    // Library library("Kalin");
+    // library.add(book);
+    // library.add(next);
+    // library.serialize("library.bin");
+
+    Library copy("placeholder");
+    copy.deserialize("library.bin");
+    std::cout<<copy.getName()<<'\n';
     return 0;
 }
