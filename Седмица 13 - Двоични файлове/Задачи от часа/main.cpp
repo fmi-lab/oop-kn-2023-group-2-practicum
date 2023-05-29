@@ -3,12 +3,15 @@
 #include <cstring>
 #include <string>
 #include <vector>
+#include <new>
+#include <stdexcept>
+#include "../../Седмица 15 - Изключения/fileNotFoundException.hpp"
 
 class BinarySerializable
 {
 public:
-    virtual void serialize(const std::string &filename) = 0;
-    virtual void serializeAt(const std::string &filename, std::size_t pos) = 0;
+    virtual void serialize(const std::string &filename) noexcept = 0;
+    virtual void serializeAt(const std::string &filename, std::size_t pos) noexcept = 0;
     virtual void deserialize(const std::string &filename) = 0;
     virtual void deserializeAt(const std::string &filename, std::size_t pos) = 0;
 };
@@ -28,20 +31,21 @@ public:
         strcpy(author, _author);
     }
 
-    void print() const {
-        std::cout<<name<<" "<<author<<" "<<id<<'\n';
+    void print() const
+    {
+        std::cout << name << " " << author << " " << id << '\n';
     }
 
-    void serialize(const std::string &filename)
+    void serialize(const std::string &filename) noexcept
     {
         std::fstream os(filename, std::ios::out | std::ios::binary | std::ios::app);
         os.write(reinterpret_cast<const char *>(this), sizeof(Book));
         os.close();
     }
-    void serializeAt(const std::string &filename, std::size_t pos)
+    void serializeAt(const std::string &filename, std::size_t pos) noexcept
     {
-        std::fstream os(filename, std::ios::out | std::ios::binary | std::ios::app); // !
-        os.seekp(0, std::ios::end); // !
+        std::fstream os(filename, std::ios::out | std::ios::binary | std::ios::app);
+        os.seekp(0, std::ios::end);                                                  
         std::streampos size = os.tellp();
         std::size_t booksSize = size / sizeof(Book);
         if (pos <= booksSize)
@@ -54,6 +58,15 @@ public:
     void deserialize(const std::string &filename)
     {
         std::fstream is(filename, std::ios::in);
+
+        if (!is.good())
+        {
+            std::string message = "Could not open file with name: ";
+            message += filename;
+            is.close();
+            throw FileNotFoundException(message);
+        }
+        
         is.read(reinterpret_cast<char *>(this), sizeof(Book));
         is.close();
     }
@@ -67,36 +80,55 @@ private:
     unsigned id;
 };
 
-class Library : public BinarySerializable {
+class Library : public BinarySerializable
+{
 public:
-    Library(const std::string& _name) : name(_name) {}
+    Library(const std::string &_name) : name(_name) {}
 
-    void serialize(const std::string &filename) {
+    void serialize(const std::string &filename) noexcept
+    {
         std::fstream os(filename, std::ios::out | std::ios::binary);
 
         std::size_t nameLength = name.size();
-        os.write(reinterpret_cast<const char*>(&nameLength), sizeof(std::size_t));
-        os.write(name.c_str(), nameLength);   
+        os.write(reinterpret_cast<const char *>(&nameLength), sizeof(std::size_t));
+        os.write(name.c_str(), nameLength);
 
         std::size_t booksLength = books.size();
-        os.write(reinterpret_cast<const char*>(&booksLength), sizeof(std::size_t));
+        os.write(reinterpret_cast<const char *>(&booksLength), sizeof(std::size_t));
 
         os.close();
-        for (Book& book : books)
+        for (Book &book : books)
         {
             book.serialize(filename);
         }
     }
 
-    void serializeAt(const std::string &filename, std::size_t pos) {
-
+    void serializeAt(const std::string &filename, std::size_t pos) noexcept
+    {
     }
 
-    void deserialize(const std::string &filename) {
+    void deserialize(const std::string &filename)
+    {
         std::fstream is(filename, std::ios::in);
+
+        if (!is.good())
+        {
+            std::string message = "Could not open file with name: ";
+            message += filename;
+            is.close();
+            throw FileNotFoundException(message);
+        }
+
         std::size_t nameSize;
-        is.read(reinterpret_cast<char*>(&nameSize), sizeof(std::size_t));
-        char* binaryName = new char[nameSize+1];
+        is.read(reinterpret_cast<char *>(&nameSize), sizeof(std::size_t));
+        char *binaryName = new (std::nothrow) char[nameSize + 1];
+
+        if(!binaryName) {
+            std::string message = "Could not allocate memory of size: ";
+            message += nameSize + 1;
+            throw std::runtime_error(message);
+        }
+
         is.read(binaryName, nameSize);
 
         name = std::string();
@@ -105,9 +137,9 @@ public:
             name.push_back(binaryName[i]);
         }
         delete[] binaryName;
-        
+
         std::size_t booksSize;
-        is.read(reinterpret_cast<char*>(&booksSize), sizeof(std::size_t));
+        is.read(reinterpret_cast<char *>(&booksSize), sizeof(std::size_t));
         is.close();
         for (size_t i = 0; i < booksSize; i++)
         {
@@ -117,21 +149,25 @@ public:
         }
     }
 
-    void deserializeAt(const std::string &filename, std::size_t pos) {
-
+    void deserializeAt(const std::string &filename, std::size_t pos)
+    {
     }
 
-    void add(const Book& book) {
+    void add(const Book &book) noexcept
+    {
         books.push_back(book);
     }
 
-    std::size_t getListSize() const {
+    std::size_t getListSize() const noexcept
+    {
         return books.size();
     }
 
-    const std::string& getName() const {
+    const std::string &getName() const noexcept
+    {
         return name;
     }
+
 private:
     std::string name;
     std::vector<Book> books;
@@ -161,19 +197,38 @@ int main()
     // std::cout<<a<<' '<<b<<'\n';
     // std::cout<<std::boolalpha<<even(5)<<' ' <<even(4)<<'\n';
     // std::cout << change_sign(-7) << '\n';
-    // Book book("LOTR", "Tolkien", 5);
-    // book.serialize("book.bin");
-    // Book next;
-    // next.deserialize("book.bin");
-    // next.print();
-    // next.serializeAt("book.bin", 1);
-    // Library library("Kalin");
-    // library.add(book);
-    // library.add(next);
-    // library.serialize("library.bin");
+    
+    Book book("LOTR", "Tolkien", 5);
+    book.serialize("book.bin");
+    Book next;
+    
+    try
+    {
+        next.deserialize("book1.bin");
+        next.print();
+        next.serializeAt("book.bin", 1);
 
-    Library copy("placeholder");
-    copy.deserialize("library.bin");
-    std::cout<<copy.getName()<<'\n';
+        Library library("Kalin");
+        library.add(book);
+        library.add(next);
+        library.serialize("library.bin");
+
+        Library copy("placeholder");
+        copy.deserialize("library1.bin");
+        std::cout << copy.getName() << '\n';
+    }
+    catch (const FileNotFoundException &e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+    catch (const std::runtime_error &e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+
     return 0;
 }
